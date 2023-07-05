@@ -1,7 +1,10 @@
+import axios from 'axios'
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import CreateForm from './components/CreateForm'
+import LoginForm from './components/LoginForm'
 
 const App = () => {
 
@@ -10,21 +13,45 @@ const App = () => {
   const [password, setPassword] = useState('') 
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
 
-
+  /*
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
     )  
   }, [])
-  
+  */
+
    useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
+     async function fetchData(){
+      const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+      if (loggedUserJSON) {
+        const user = JSON.parse(loggedUserJSON)       
+        console.log(user)
+        const result =  await loginService.checkToken(user.token)        
+        if(result.error==='TokenExpiredError'){
+          console.log('sesion caducada')  //en caso de que pongamos el token en el back expire pronto 
+          setUser(null)
+        }else{
+          
+          
+
+          /*
+          const response = await axios.get('http://localhost:3003/api/blogs')
+          const blogs = response.data
+          console.log(blogs)
+          setBlogs( blogs )
+          */
+
+          setUser(user)
+          blogService.setToken(user.token)
+        } 
+      }       
     }
+    fetchData()
   }, [])
 
 
@@ -51,28 +78,40 @@ const App = () => {
     }
   }
 
+  const handleCreate =  (event) => {
+    event.preventDefault()
+
+  }
+
+  const logout = (event) =>{   
+      event.preventDefault()
+      window.localStorage.removeItem('loggedBlogappUser')
+      setUser(null)
+  } 
+
+
+  const onChangeUserName = ({target}) => setUsername(target.value)
+  const onChangePassword =({target}) => setPassword(target.value) 
+  const onChangeTitle = ({target}) => setTitle(target.value)
+  const onChangeAuthor = ({target}) => setAuthor(target.value)    
+  const onChangeUrl = ({target}) => setUrl(target.value)  
 
   const loginForm = () => (
-    <div>
-      <h2>Log in to Application</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          username <input  type="text"  value={username}  name="Username"  onChange={({ target }) => setUsername(target.value)} />
-        </div>
-        <div>
-          password <input  type="password"  value={password}  name="Password"  onChange={({ target }) => setPassword(target.value)} />
-        </div>
-        <button type="submit">login</button>
-      </form>      
-    </div> 
-  )
+    <LoginForm handleLogin = {handleLogin} onChangeUsername ={onChangeUserName} onChangepassword = {onChangePassword}
+    userName ={username} password={password} 
+    />     
+) 
+  
 
 
   const blogsList = () =>(     
       <div>
-        <h2>blogs</h2>       
-        <h3>{user.name}</h3>
-        { blogs.map(blog =>< Blog key={blog.id} blog={blog} />)}
+        <h1>Blogs</h1>
+        <span>User {user.name} , you are logged in</span>  <button onClick={logout}>logout</button>   
+        <CreateForm onHandleCreate={handleCreate} title={title} author={author} url={url}
+                    onChangeTitle = {onChangeTitle} onChangeAuthor={onChangeAuthor} onChangeUrl={onChangeUrl}
+                    />
+        {blogs.map(blog =>< Blog key={blog.id} blog={blog} />)}
       </div>        
    )
 
