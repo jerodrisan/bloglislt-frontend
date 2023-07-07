@@ -1,11 +1,10 @@
 
 
-const CreateForm = ({handleCreate, title, author, url, onChangeTitle, onChangeAuthor, onChangeUrl})=>{
-    
+const CreateForm = ({onHandleCreate, title, author, url, onChangeTitle, onChangeAuthor, onChangeUrl})=>{    
     return(
         <div>
              <h1>Create</h1>         
-            <form onSubmit={handleCreate}>
+            <form onSubmit={onHandleCreate}>
             <div>
             title <input  type="text"  value={title}  name="Title"   onChange={onChangeTitle}/>
             </div>

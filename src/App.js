@@ -27,25 +27,18 @@ const App = () => {
 
    useEffect(() => {
      async function fetchData(){
-      const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-      if (loggedUserJSON) {
+      const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')     
+      if (loggedUserJSON) {       
         const user = JSON.parse(loggedUserJSON)       
         console.log(user)
         const result =  await loginService.checkToken(user.token)        
         if(result.error==='TokenExpiredError'){
           console.log('sesion caducada')  //en caso de que pongamos el token en el back expire pronto 
           setUser(null)
-        }else{
-          
-          
-
-          /*
-          const response = await axios.get('http://localhost:3003/api/blogs')
-          const blogs = response.data
-          console.log(blogs)
-          setBlogs( blogs )
-          */
-
+          setBlogs([])
+        }else{          
+          const blogs = await blogService.getUserBlogs(user.userid)       
+          setBlogs( blogs ) 
           setUser(user)
           blogService.setToken(user.token)
         } 
@@ -65,7 +58,9 @@ const App = () => {
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user)) 
       //console.log(user.token)
       blogService.setToken(user.token)
+      const blogs = await blogService.getUserBlogs(user.userid)       
       setUser(user)
+      setBlogs( blogs )       
       setUsername('')
       setPassword('')
     }catch (exception) {
@@ -78,15 +73,28 @@ const App = () => {
     }
   }
 
-  const handleCreate =  (event) => {
+  const handleCreate =  async (event) => {   
     event.preventDefault()
+    try{
+      const newBlog = await blogService.create({
+        title, author, url
+      })
+      console.log(newBlog)
+      const allblogs = blogs.concat(newBlog)     
+      setBlogs(allblogs)
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+    }catch(error){
 
+    }
   }
 
   const logout = (event) =>{   
       event.preventDefault()
       window.localStorage.removeItem('loggedBlogappUser')
       setUser(null)
+      setBlogs([])
   } 
 
 
@@ -100,9 +108,7 @@ const App = () => {
     <LoginForm handleLogin = {handleLogin} onChangeUsername ={onChangeUserName} onChangepassword = {onChangePassword}
     userName ={username} password={password} 
     />     
-) 
-  
-
+  )  
 
   const blogsList = () =>(     
       <div>
@@ -113,12 +119,12 @@ const App = () => {
                     />
         {blogs.map(blog =>< Blog key={blog.id} blog={blog} />)}
       </div>        
-   )
+  )
 
   return (
     <div>    
       {user === null && loginForm()}
-      {user !== null && blogsList()}     
+      {user !== null && blogsList()}
     </div>
   )
  
