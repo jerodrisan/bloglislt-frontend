@@ -1,11 +1,12 @@
 
 
-const Form = ({handleLogin, onChangeUsername, onChangepassword, userName, password})=>{
-  
+const Form = ({handleLogin, onChangeUsername, onChangepassword, userName, password, notification, Notificacion})=>{  
     
   return(
     <div>       
         <div>         
+          <h2>Log in to Application</h2>      
+          <div className="wrapper-notif">{notification && Notificacion()}</div>   
           <form onSubmit={handleLogin}>
             <div>
               username <input  type="text"  value={userName}  name="Username"  onChange={onChangeUsername} />
