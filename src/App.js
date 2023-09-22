@@ -19,6 +19,8 @@ const App = () => {
   const [notification, setNotification] = useState(null)
   const createFormRef = useRef()
   
+ 
+
 
   /*
   useEffect(() => {
@@ -40,7 +42,8 @@ const App = () => {
           setUser(null)
           setBlogs([])
         }else{          
-          const blogs = await blogService.getUserBlogs(user.userid)       
+          const blogs = await blogService.getUserBlogs(user.userid) 
+          blogs.sort((a,b)=> b.likes-a.likes)  //ordenamos por likes          
           setBlogs( blogs ) 
           setUser(user)
           blogService.setToken(user.token)
@@ -61,7 +64,8 @@ const App = () => {
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user)) 
       console.log('usuario', user.token)     
       blogService.setToken(user.token)
-      const blogs = await blogService.getUserBlogs(user.userid)       
+      const blogs = await blogService.getUserBlogs(user.userid)   
+      //const blogs =  blogService.getUserBlogs(user.userid)   
       setUser(user)
       setBlogs( blogs )       
       setUsername('')
@@ -75,8 +79,18 @@ const App = () => {
     }
   }
   
-  
 
+    //Borramos blog cuando pulsamos el boton remove
+    const removeBlog =  async (id, userid, title) => {
+
+     let confirmar = window.confirm(`Do you wnat to delete the following blog ? \n${title}` )
+     if (confirmar){
+      await blogService.removeBlog(id)  //no devolvera nada el backend      
+      const blogsdeleted = await blogService.getUserBlogs(userid) //una vez borrado, actualizamos los blogs            
+      setBlogs(blogsdeleted)   
+     }
+  }
+    
   const handleCreateBlog = async ({title, author, url}) =>{    
     try{
       const newBlog = await blogService.create({
@@ -131,18 +145,20 @@ const App = () => {
   )
 
    
+  
 
-  const blogsList = () =>(           
+  const blogsList = () =>(      
     <div>        
       <h1>Blogs</h1>      
-      <div  className="wrapper-notif">{notification && Notificacion()}     </div>
-      <span>User {user.name} , you are logged in</span>  <button onClick={logout}>logout</button>   
-      <Togglable buttonLabel='Reveal Create form' buttonLabel2='Hide Create form'  ref={createFormRef}>
+      <div  className="wrapper-notif">{notification && Notificacion()} </div>
+       <span>User {user.name} , you are logged in</span>  <button onClick={logout}>logout</button>   
+      <Togglable buttonLabel={'Reveal Create form '} buttonLabel2='Hide Create form'  ref={createFormRef}>
         <CreateForm createBlog={handleCreateBlog} />
-      </Togglable> 
-      {blogs.map(blog =>< Blog key={blog.id} blog={blog} username = {user.name}/>)}
+      </Togglable>  
+       {blogs.map(blog =>< Blog key={blog.id} blog={blog} username = {user.name}  removeBlog={removeBlog}
+       />) } 
     </div>        
-)
+  )
 
 
   return (

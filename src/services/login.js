@@ -12,4 +12,5 @@ const checkToken = async token =>{
   return response.data
 }
 
-export default { login , checkToken }
+const loginObject =  { login , checkToken }
+export default loginObject;
