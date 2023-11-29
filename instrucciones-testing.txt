@@ -1,0 +1,24 @@
+1. Instalamos librerias con el siguiente comando: 
+
+npm install --save-dev @testing-library/react @testing-library/jest-dom jest-environment-jsdom @babel/preset-env @babel/preset-react
+
+2. El json lo extenemos asi: 
+{
+  "scripts": {
+    // ...
+    "test": "jest"
+  }
+  // ...
+  "jest": {
+    "testEnvironment": "jsdom"
+  }
+}
+
+3. Creamos una archivo .babelrc :
+{
+  "presets": [
+    "@babel/preset-env",
+    ["@babel/preset-react", { "runtime": "automatic" }]
+  ]
+}
+
